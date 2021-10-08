@@ -14,23 +14,51 @@ struct ContentView: View {
 }
 
 struct Home: View {
+    // to track the header view
+    @State var time = Timer.publish(every: 0.1, on: .current, in: .tracking).autoconnect()
 
+    @State var show = false
     var body: some View {
-        VStack{
-            Image("naruto")
-                .resizable()
-                .frame(height: UIScreen.main.bounds.height / 2)
-            VStack(alignment: .leading) {
-                Text("Naruto")
-                    .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                    .padding([.top,.bottom])
+        ScrollView {
+            VStack{
+                /* Stretchy header */
+                GeometryReader { proxy in
+                    Image("naruto")
+                        .resizable()
+                        // fixing the view to the top for the stretchy effect
+                        .offset(y: proxy.frame(in: .global).minY > 0 ? -proxy.frame(in: .global).minY  : 0)
+                        // increase header height by draging amount
+                        .frame(height: proxy.frame(in: .global).minY > 0 ? UIScreen.main.bounds.height / 2 + proxy.frame(in: .global).minY : UIScreen.main.bounds.height / 2)
+                        .onReceive(time, perform: { _ in
+                            let y = proxy.frame(in: .global).minY
+                            if -y > UIScreen.main.bounds.height / 2 - 50 {
+                                show = true
+                            }else{
+                                show = false
+                            }
+                        })
 
-                Text(textDetail)
+
+
+
+                    // fixing default frame
+                }.frame(height: UIScreen.main.bounds.height / 2)
+
+
+                VStack(alignment: .leading) {
+                    Text("Naruto")
+                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                        .padding()
+
+                    Text(textDetail)
+                        .padding([.leading,.trailing])
+                }
+
+                Spacer()
             }
-
-            Spacer()
         }.edgesIgnoringSafeArea(.top)
+
     }
 }
 
